@@ -61,5 +61,7 @@ mkdir local/lib
 cp /usr/lib64/libprotobuf.so* local/lib/
 
 zip -r ~/deps.zip local/lib
+
 zip -9 -q -r ~/deps.zip helper.py
+
 zip -9 -q -r ~/deps.zip lambda.py
