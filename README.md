@@ -1,67 +1,78 @@
 # pytorch-caffe2-aws-lambda
 
-sudo yum update -y
-sudo yum -y upgrade
-sudo yum -y groupinstall "Development Tools"
+AWS Lambda Function with Numpy, protobuf, pillow, Caffe2 and ONNX
 
-sudo yum install -y \
-automake \
-cmake \
-protobuf-devel \
-python-devel \
-python-pip \
-git
+Can run Caffe2 models and PyTorch models converted with ONNX
 
-sudo yum install -y gcc zlib zlib-devel openssl openssl-devel
-sudo yum install -y libjpeg-devel
+Inspired by [LINK](https://github.com/cemoody/lambda-chainer)
 
-pip install virtualenv
-virtualenv ~/env && cd ~/env && source bin/activate
-pip install numpy
+Instructions:
 
-pip install --use-wheel --no-index -f http://dist.plone.org/thirdparty/ -U PIL --trusted-host dist.plone.org
-pip install protobuf
-pip install future
-pip install requests
-cd
-touch env/lib/python2.7/site-packages/google/__init__.py
+    sudo yum update -y
+    sudo yum -y upgrade
+    sudo yum -y groupinstall "Development Tools"
 
-mkdir cf3
+    sudo yum install -y \
+    automake \
+    cmake \
+    protobuf-devel \
+    python-devel \
+    python-pip \
+    git
 
-git clone --recursive https://github.com/caffe2/caffe2.git && cd caffe2
+    sudo yum install -y gcc zlib zlib-devel openssl openssl-devel
+    sudo yum install -y libjpeg-devel
 
-mkdir build && cd build
+    pip install virtualenv
+    virtualenv ~/env && cd ~/env && source bin/activate
+    pip install numpy
 
-cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX="/home/ec2-user/cf3/" -DCMAKE_PREFIX_PATH="/home/ec2-user/cf3/" -DUSE_GFLAGS=OFF  ..
-make -j20
-make install/fast
+    pip install --use-wheel --no-index -f http://dist.plone.org/thirdparty/ -U PIL --trusted-host dist.plone.org
+    pip install protobuf
+    pip install future
+    pip install requests
+    pip install onnx
+    cd ~
 
-cd ~
-for dir in $VIRTUAL_ENV/lib64/python2.7/site-packages \
-	   $VIRTUAL_ENV/lib/python2.7/site-packages
-do
-  if [ -d $dir ] ; then
-    pushd $dir; zip -9 -q -r ~/deps.zip .; popd
-  fi
-done
+    mkdir cf2
 
-git clone https://github.com/google/protobuf.git
-cd protobuf
-zip -9 -q -r ~/deps.zip python
+    git clone --recursive https://github.com/caffe2/caffe2.git && cd caffe2
 
-cd ~
+    mkdir build && cd build
 
-cd cf3
-zip -9 -q -r ~/deps.zip caffe2
-cd ~
+    cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX="/home/ec2-user/cf2/" -DCMAKE_PREFIX_PATH="/home/ec2-user/cf2/" -DUSE_GFLAGS=OFF  ..
+    make -j4
+    make install/fast
 
-mkdir local
-mkdir local/lib
+    cd ~
+    git clone --recursive https://github.com/onnx/onnx-caffe2
+    cd onnx-caffe2
+    git reset --hard f7509f293d781638ef14ac3d232de0c140ed8277
+    python setup.py install
 
-cp /usr/lib64/libprotobuf.so* local/lib/
+    cd ~
+    for dir in $VIRTUAL_ENV/lib64/python2.7/site-packages \
+           $VIRTUAL_ENV/lib/python2.7/site-packages
+    do
+      if [ -d $dir ] ; then
+        pushd $dir; zip -9 -q -r ~/deps.zip .; popd
+      fi
+    done
 
-zip -r ~/deps.zip local/lib
+    git clone https://github.com/google/protobuf.git
+    cd protobuf
+    zip -9 -q -r ~/deps.zip python
 
-zip -9 -q -r ~/deps.zip helper.py
+    cd ~
 
-zip -9 -q -r ~/deps.zip lambda.py
+    cd cf2
+    zip -9 -q -r ~/deps.zip caffe2
+    cd ~
+
+    mkdir local
+    mkdir local/lib
+
+    cp /usr/lib64/libprotobuf.so* local/lib/
+
+    zip -9 -q -r ~/deps.zip local/lib
+    zip -9 -q -r ~/deps.zip test.py
