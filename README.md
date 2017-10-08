@@ -4,6 +4,8 @@ AWS Lambda Function with Numpy, protobuf, pillow, Caffe2 and ONNX
 
 Can run Caffe2 models and PyTorch models converted with ONNX
 
+A writeup is available here: https://medium.com/@michaelulin/serving-pytorch-models-on-aws-lambda-with-caffe2-onnx-7b096806cfac
+
 Inspired by [LINK](https://github.com/cemoody/lambda-chainer)
 
 Instructions:
