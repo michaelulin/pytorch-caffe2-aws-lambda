@@ -75,4 +75,3 @@ Instructions:
     cp /usr/lib64/libprotobuf.so* local/lib/
 
     zip -9 -q -r ~/deps.zip local/lib
-    zip -9 -q -r ~/deps.zip test.py

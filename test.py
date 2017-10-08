@@ -1,3 +1,15 @@
+import boto3
+import os
+
+# Check if models are available
+
+if os.path.isfile('/tmp/model.proto') != True:
+    s3 = boto3.client('s3')
+    s3.download_file('mybucket', 'model.proto', '/tmp/model.proto')
+
+
+# Add libraries
+
 import ctypes
 import os
 
@@ -8,20 +20,27 @@ for d, dirs, files in os.walk(os.path.join(os.getcwd(), 'local', 'lib')):
         ctypes.cdll.LoadLibrary(os.path.join(d, f))
 
 import numpy as np
-from caffe2.python import workspace
+
 import json
+import onnx
+import onnx_caffe2.backend as backend
+
+# Load ONNX model
+graph = onnx.load("/tmp/model.proto")
+
+# Load model into Caffe2
+model = backend.prepare(graph, device="CPU")
+
 
 def handler(event, context):
-    x = np.random.rand(4, 3, 2)
-    print(x)
-    print(x.shape)
+    # Create dummy input for model
+    x = np.random.randn(1, 3, 224, 224)
 
-    workspace.FeedBlob("my_x", x)
+    # Get model output
+    output = model.run(x.astype(np.float32))
 
-    x2 = workspace.FetchBlob("my_x")
-    ret = json.dumps(str(x2))
-
+    # return results formatted for AWS API Gateway
     return {"statusCode": 200, \
             "headers": {"Content-Type": "application/json"}, \
-             "body": ret}
+             "body": json.dumps(str(output))}
 

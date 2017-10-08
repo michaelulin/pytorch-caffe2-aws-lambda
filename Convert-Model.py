@@ -8,13 +8,13 @@ import numpy as np
 
 # load model
 model = torch.load("model.p")
-model.cuda()
+model.cpu()
 
 # Evaluation Mode
 model.train(False)
 
 # Create dummy input
-dummy_input = Variable(torch.randn(1, 3, 224, 224)).cuda()
+dummy_input = Variable(torch.randn(1, 3, 224, 224))
 output_torch = model(dummy_input)
 
 # Export ONNX model
