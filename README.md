@@ -17,13 +17,20 @@ Instructions:
     sudo yum install -y \
     automake \
     cmake \
-    protobuf-devel \
     python-devel \
     python-pip \
     git
 
     sudo yum install -y gcc zlib zlib-devel openssl openssl-devel
     sudo yum install -y libjpeg-devel
+    
+    git clone https://github.com/google/protobuf.git
+    cd protobuf
+    ./autogen.sh
+    ./configure
+    make
+    sudo make install
+    sudo ldconfig
 
     pip install virtualenv
     virtualenv ~/env && cd ~/env && source bin/activate
@@ -61,7 +68,6 @@ Instructions:
       fi
     done
 
-    git clone https://github.com/google/protobuf.git
     cd protobuf
     zip -9 -q -r ~/deps.zip python
 
